@@ -117,17 +117,20 @@ ua.includes("msie") ||
 ua.includes("trident") ||
 (ua.includes("mozilla") && !ua.includes("wv") && !ua.includes("iphone"));
 
-// detecta possível WebView
+// detecta possível WebView - CORRIGIDO
 
 let app =
 
 ua.includes("wv") ||
-(ua.includes("android") && !ua.includes("chrome")) ||
-(!ua.includes("safari") && ua.includes("iphone")) ||
-(ua.includes("iphone") && !ua.includes("safari")) ||
-ua.includes("instagram") ||
 ua.includes("fbav") ||
-ua.includes("fb_iab");
+ua.includes("fb_iab") ||
+ua.includes("instagram") ||
+ua.includes("tiktok") ||
+ua.includes("line") ||
+(ua.includes("android") && ua.includes("wv")) ||
+(ua.includes("iphone") && !ua.includes("safari")) ||
+(ua.includes("ipad") && !ua.includes("safari")) ||
+navigator.standalone === true;
 
 // detecta automação/bot/devtools
 
