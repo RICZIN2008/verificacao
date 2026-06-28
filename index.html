@@ -1,251 +1,203 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>TroopDark</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TDK Security</title>
 
 <style>
 
-/* =========================
-RESET
-========================= */
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
-/* =========================
-FUNDO ESTÁVEL
-========================= */
-
 body{
-  font-family:Arial,sans-serif;
-  color:#fff;
-  min-height:100vh;
 
-  background-image:url("https://files.catbox.moe/ai2gz5.png");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
+margin:0;
+height:100vh;
 
-  position:relative;
-  overflow-x:hidden;
+display:flex;
+align-items:center;
+justify-content:center;
+
+background:#050505;
+
+font-family:Arial;
+
+color:white;
+
 }
 
-/* overlay escuro (não quebra imagem) */
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.65);
-  z-index:0;
+.box{
+
+text-align:center;
+
+background:#111;
+
+padding:30px;
+
+border-radius:20px;
+
 }
 
-/* =========================
-CONTEÚDO
-========================= */
+.vermelho{
 
-.hero{
-  background:rgba(0,0,0,0.6);
-  padding:25px;
-  text-align:center;
-  font-weight:bold;
-  font-size:22px;
-  position:relative;
-  z-index:1;
+background:#700000;
+
+animation:pulse 1s infinite;
+
 }
 
-.container{
-  padding:15px;
-  position:relative;
-  z-index:1;
+.loader{
+
+width:45px;
+height:45px;
+
+border:5px solid #333;
+
+border-top:5px solid white;
+
+border-radius:50%;
+
+animation:girar 1s linear infinite;
+
+margin:auto;
+
 }
 
-.title-cat{
-  margin:18px 0 10px;
-  color:#aaa;
-  font-size:13px;
+@keyframes girar{
+
+100%{
+transform:rotate(360deg);
 }
 
-/* =========================
-CARDS
-========================= */
-
-.cards{
-  display:flex;
-  gap:12px;
-  overflow-x:auto;
-  padding-bottom:5px;
-  -webkit-overflow-scrolling:touch;
 }
 
-.cards::-webkit-scrollbar{
-  height:4px;
+@keyframes pulse{
+
+50%{
+
+box-shadow:0 0 40px red;
+
 }
 
-.cards::-webkit-scrollbar-thumb{
-  background:#333;
-  border-radius:20px;
-}
-
-.card{
-  min-width:160px;
-  max-width:160px;
-  background:#1e1e1e;
-  border-radius:12px;
-  overflow:hidden;
-  flex-shrink:0;
-}
-
-.card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  background:#111;
-}
-
-.info{
-  padding:10px;
-}
-
-.nome{
-  font-size:13px;
-  font-weight:bold;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.tipo{
-  font-size:11px;
-  color:#aaa;
-  margin:6px 0;
-}
-
-.btn{
-  display:block;
-  text-align:center;
-  text-decoration:none;
-  background:#25D366;
-  color:#fff;
-  padding:8px;
-  border-radius:7px;
-  font-size:12px;
-  font-weight:bold;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div class="hero">TROOPDARK</div>
+<div class="box" id="tela">
 
-<div class="container">
+<div class="loader"></div>
 
-  <div class="title-cat">GRUPO PRINCIPAL</div>
-  <div class="cards" id="grupoPrincipal"></div>
-
-  <div class="title-cat">CANAL PRINCIPAL</div>
-  <div class="cards" id="canalPrincipal"></div>
-
-  <div class="title-cat">GRUPOS PARCEIROS</div>
-  <div class="cards" id="gruposParceiros"></div>
-
-  <div class="title-cat">CANAIS PARCEIROS</div>
-  <div class="cards" id="canaisParceiros"></div>
+<h2>
+Verificando segurança...
+</h2>
 
 </div>
 
 <script>
 
-const IMG_PADRAO =
-"https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
+let ua = navigator.userAgent.toLowerCase();
 
-/* =========================
-DADOS
-========================= */
+// detecta navegador comum
 
-const grupoPrincipal = {
-  nome: "TroopDark ᵗᵈᵏ",
-  foto: "https://files.catbox.moe/lcl4vw.png",
-  link: "https://chat.whatsapp.com/LBQmatzACkd7T71mcMB5hM"
-};
+let navegador =
 
-const canalPrincipal = {
-  nome: "TroopDark ᵗᵈᵏ #Channel",
-  foto: "https://files.catbox.moe/lcl4vw.png",
-  link: "https://whatsapp.com/channel/0029Vb7ZerTBqbr5oNdmst01"
-};
+ua.includes("chrome") ||
+ua.includes("firefox") ||
+ua.includes("safari") ||
+ua.includes("edge") ||
+ua.includes("opr") ||
+ua.includes("opera") ||
+ua.includes("brave") ||
+ua.includes("vivaldi") ||
+ua.includes("msie") ||
+ua.includes("trident") ||
+(ua.includes("mozilla") && !ua.includes("wv") && !ua.includes("iphone"));
 
-const gruposParceiros = [
-  {
-    nome: "Sem Grupo",
-    foto: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
-    link: "https://chat.whatsapp.com/LINK1"
-  },
-  {
-    nome: "Sem Grupo",
-    foto: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
-    link: "https://chat.whatsapp.com/LINK1"
-  }
-];
+// detecta possível WebView
 
-const canaisParceiros = [
-  {
-    nome: "Aliança AMT Channel #⁰⁰⁷🇰🇷",
-    foto: "https://files.catbox.moe/o5eb0u.png",
-    link: "https://whatsapp.com/channel/0029VbCZdnDJP21Amqx92B2z"
-  },
-  {
-    nome: "Sem Channel",
-    foto: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
-    link: "https://chat.whatsapp.com/LINK2"
-  }
-];
+let app =
 
-/* =========================
-CARD
-========================= */
+ua.includes("wv") ||
+(ua.includes("android") && !ua.includes("chrome")) ||
+(!ua.includes("safari") && ua.includes("iphone")) ||
+(ua.includes("iphone") && !ua.includes("safari")) ||
+ua.includes("instagram") ||
+ua.includes("fbav") ||
+ua.includes("fb_iab");
 
-function card(item, tipo){
-  return `
-  <div class="card">
-    <img src="${item.foto || IMG_PADRAO}"
-         onerror="this.src='${IMG_PADRAO}'">
-    <div class="info">
-      <div class="nome">${item.nome}</div>
-      <div class="tipo">${tipo}</div>
-      <a class="btn" href="${item.link}" target="_blank">Entrar</a>
-    </div>
-  </div>
-  `;
+// detecta automação/bot/devtools
+
+let bot = 
+navigator.webdriver ||
+window.callPhantom ||
+window._phantom ||
+window.__selenium_unwrapped ||
+window.document.__webdriver_script_fn ||
+window.__driver_evaluate ||
+window.__webdriver_evaluate ||
+window.__fxdriver_evaluate ||
+ua.includes("headless") ||
+ua.includes("puppeteer") ||
+ua.includes("playwright") ||
+(window.outerWidth - window.innerWidth > 100) ||
+(window.outerHeight - window.innerHeight > 100) ||
+(window.innerHeight < 300);
+
+// detecta iframe/incognito suspeito
+
+let frame = window.top !== window.self || window.location.ancestorOrigins.length > 0;
+
+// bloqueio
+
+function violacao(texto){
+
+document.getElementById("tela").className="box vermelho";
+
+document.getElementById("tela").innerHTML=`
+
+<h1>⚠️ VIOLAÇÃO DETECTADA</h1>
+
+<p>${texto}</p>
+
+<div class="loader"></div>
+
+<p>Acesso bloqueado</p>
+
+`;
+
+// loop infinito de verificação
+
+setInterval(()=>{
+
+console.log("Bloqueado");
+
+location.reload();
+
+},3000);
+
 }
 
-/* =========================
-RENDER
-========================= */
+if((!app && navegador) || bot || frame){
 
-function render(){
+violacao("Navegador não autorizado");
 
-  document.getElementById("grupoPrincipal").innerHTML =
-    card(grupoPrincipal, "Grupo");
-
-  document.getElementById("canalPrincipal").innerHTML =
-    card(canalPrincipal, "Canal");
-
-  document.getElementById("gruposParceiros").innerHTML =
-    gruposParceiros.map(g => card(g, "Grupo Parceiro")).join("");
-
-  document.getElementById("canaisParceiros").innerHTML =
-    canaisParceiros.map(c => card(c, "Canal Parceiro")).join("");
 }
 
-document.addEventListener("DOMContentLoaded", render);
+// liberar app
+
+else{
+
+setTimeout(()=>{
+
+window.location.href="https://tdk000999.base44.app";
+
+},2000);
+
+}
 
 </script>
 
