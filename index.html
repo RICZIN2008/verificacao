@@ -3,115 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>TDK Security</title>
 
 <style>
-body {
-    margin: 0;
-    height: 100vh;
-    background: #050505;
-    overflow: hidden;
+
+body{
+    margin:0;
+    height:100vh;
+    background:#050505;
+    font-family:Arial,sans-serif;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
 }
 
-#lock {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #050505;
-    z-index: 99999;
+.box{
+    text-align:center;
+    background:#111;
+    padding:30px;
+    border-radius:20px;
+    min-width:280px;
 }
 
-.box {
-    text-align: center;
-    background: #111;
-    padding: 30px;
-    border-radius: 20px;
-    min-width: 280px;
-    font-family: Arial, sans-serif;
-    color: white;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.loader{
+    width:45px;
+    height:45px;
+    border:5px solid #333;
+    border-top:5px solid white;
+    border-radius:50%;
+    animation:girar 1s linear infinite;
+    margin:20px auto;
 }
 
-.loader {
-    width: 45px;
-    height: 45px;
-    border: 5px solid #333;
-    border-top: 5px solid white;
-    border-radius: 50%;
-    animation: girar 1s linear infinite;
-    margin: 20px auto;
-}
-
-@keyframes girar {
-    100% {
-        transform: rotate(360deg);
+@keyframes girar{
+    100%{
+        transform:rotate(360deg);
     }
 }
+
 </style>
 
 </head>
 
 <body>
 
-<div id="lock">
-</div>
 
-<div class="box">
-    <div class="loader"></div>
-    <h2>Verificando ambiente...</h2>
-</div>
+<div id="container-seguro"></div>
 
 
 <script>
 
-(function(){
 
-    const UA = navigator.userAgent;
+// Detecta ambiente
 
-    // Detecta Android WebView (AppMint e similares)
-    const ehAndroid = /Android/i.test(UA);
+let ua = navigator.userAgent.toLowerCase();
 
-    const ehWebView = ehAndroid && (
-        UA.includes("wv") ||
-        UA.includes("WebView") ||
-        !UA.includes("Chrome")
-    );
+let urlParams = new URLSearchParams(window.location.search);
+
+let appParam = urlParams.get("app") || "";
 
 
-    // Permite navegador somente com parâmetro
-    const PARAM = new URLSearchParams(location.search).get("app");
+// Identificação
+
+const APP_NAME = "tdk_";
 
 
-    // Bloqueia fora do app
-    if(!ehWebView && PARAM !== "tdk_"){
+// Detecta WebView Android
 
-        document.getElementById("lock").style.display = "block";
-
-        document.querySelector(".box").innerHTML =
-        `
-        <h2 style="color:red">
-        Acesso permitido somente pelo APP
-        </h2>
-        `;
-
-        throw new Error("Bloqueado");
-
-    }
+let webview =
+ua.includes("wv") ||
+ua.includes("webview") ||
+ua.includes("android");
 
 
-    // Abre o site
-    setTimeout(function(){
+// Detecta app por parâmetro
 
-        window.location.href =
-        "https://tdk000999.base44.app";
-
-    },1500);
+let appDetectado =
+appParam === APP_NAME;
 
 
-})();
+// Permite se for WebView ou parâmetro
+
+let dentroDoApp =
+webview || appDetectado;
+
+
+
+if(dentroDoApp){
+
+
+document.getElementById("container-seguro").innerHTML = `
+
+<div class="box">
+
+<div class="loader"></div>
+
+<h2>Verificando ambiente...</h2>
+
+<p>Aguarde...</p>
+
+</div>
+
+`;
+
+
+
+setTimeout(function(){
+
+
+window.location.href =
+"https://tdk000999.base44.app";
+
+
+},1500);
+
+
+
+}else{
+
+
+document.getElementById("container-seguro").innerHTML="";
+
+
+}
+
 
 </script>
 
