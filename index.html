@@ -13,8 +13,9 @@ color:#00ff88;
 font-family:monospace;
 display:flex;
 justify-content:center;
-padding:20px;
+padding:10px;
 overflow-x:hidden;
+min-height:100vh;
 }
 
 .scan{
@@ -33,12 +34,14 @@ pointer-events:none;
 
 .box{
 width:100%;
-max-width:800px;
+max-width:1200px;
 border:1px solid #00ff88;
 border-radius:12px;
 padding:16px;
 background:rgba(0,0,0,0.9);
 box-shadow:0 0 25px #00ff8840;
+display:flex;
+flex-direction:column;
 }
 
 h1{
@@ -112,14 +115,45 @@ border:1px solid #00ff88;
 border-radius:8px;
 padding:10px;
 background:rgba(0,255,136,0.05);
-max-height:300px;
+flex:1;
 overflow-y:auto;
+margin-top:10px;
 }
 
-#output {
+.email-row {
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:6px 8px;
+margin:3px 0;
+background:rgba(0,255,136,0.03);
+border:1px solid rgba(0,255,136,0.2);
+border-radius:4px;
 font-size:12px;
-white-space:pre-wrap;
-word-break:break-all;
+}
+
+.email-row:hover {
+background:rgba(0,255,136,0.08);
+}
+
+.copy-btn {
+background:rgba(0,255,136,0.15);
+border:1px solid #00ff88;
+color:#00ff88;
+padding:3px 8px;
+font-size:10px;
+border-radius:4px;
+cursor:pointer;
+margin:0;
+text-shadow:none;
+}
+.copy-btn:hover {
+background:rgba(0,255,136,0.3);
+}
+
+.controls {
+display:flex;
+gap:10px;
 }
 
 .hidden { display:none; }
@@ -155,18 +189,19 @@ word-break:break-all;
 </div>
 </div>
 
+<div class="controls">
 <button onclick="generate()">EXECUTE GENERATION</button>
-<button onclick="copyAll()" id="copyBtn" class="hidden">COPY ALL</button>
+<button onclick="copyAll()" id="copyAllBtn" class="hidden">COPY ALL</button>
+</div>
 
 <div class="output-card hidden" id="outputCard">
-    <div class="label">OUTPUT [+DEV ALIAS]</div>
+    <div class="label">OUTPUT [+DEV ALIAS] - <span id="count">0</span> EMAILS</div>
     <div id="output"></div>
 </div>
 
 </div>
 
 <script>
-// Lista só com nomes que tem haver com dev
 const ALIAS_LIST = [
 'dev','api','git','npm','ssh','sql','css','html','json','auth',
 'beta','test','prod','stag','code','root','admin','build','push','pull',
@@ -176,7 +211,8 @@ const ALIAS_LIST = [
 'bin','lib','tmp','cache','proxy','token','jwt','oauth','hash','key',
 'debug','deploy','commit','merge','branch','docker','linux','bash','term','vim',
 'http','https','cors','dns','ssl','tcp','udp','ftp','smtp','imap',
-'redis','mongo','nginx','cloud','azure','k8s','helm','yaml','xml','regex'
+'redis','mongo','nginx','cloud','azure','k8s','helm','yaml','xml','regex',
+'queue','stack','heap','async','await','loop','map','filter','reduce','query'
 ];
 
 let generatedEmails = [];
@@ -195,32 +231,49 @@ function generate() {
     const out = document.getElementById('output');
     
     if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/.test(email)) {
-        out.innerHTML = '[!] Invalid email address';
+        out.innerHTML = '<div class="email-row">[!] Invalid email address</div>';
         document.getElementById('outputCard').classList.remove('hidden');
         return;
     }
     
     if (!number || number < 1) {
-        out.innerHTML = '[!] Invalid amount';
+        out.innerHTML = '<div class="email-row">[!] Invalid amount</div>';
         document.getElementById('outputCard').classList.remove('hidden');
         return;
     }
     
     const [name, domain] = email.split('@');
-    out.innerHTML = '[*] Generating...\n\n';
-    
     let finalAlias = ALIAS_LIST.sort(() => Math.random() - 0.5).slice(0, Math.min(number, ALIAS_LIST.length));
     generatedEmails = finalAlias.map(a => `${name}+${a}@${domain}`);
     
-    out.innerHTML += generatedEmails.join('\n');
+    out.innerHTML = '';
+    generatedEmails.forEach((mail, i) => {
+        const row = document.createElement('div');
+        row.className = 'email-row';
+        row.innerHTML = `
+            <span>${mail}</span>
+            <button class="copy-btn" onclick="copySingle(${i}, this)">COPY</button>
+        `;
+        out.appendChild(row);
+    });
+    
+    document.getElementById('count').innerText = generatedEmails.length;
     document.getElementById('outputCard').classList.remove('hidden');
-    document.getElementById('copyBtn').classList.remove('hidden');
+    document.getElementById('copyAllBtn').classList.remove('hidden');
+}
+
+function copySingle(index, btn) {
+    navigator.clipboard.writeText(generatedEmails[index]).then(() => {
+        const old = btn.innerText;
+        btn.innerText = 'COPIED';
+        setTimeout(() => btn.innerText = old, 1000);
+    });
 }
 
 function copyAll() {
     navigator.clipboard.writeText(generatedEmails.join('\n')).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.innerText = 'COPIED!';
+        const btn = document.getElementById('copyAllBtn');
+        btn.innerText = 'ALL COPIED!';
         setTimeout(() => btn.innerText = 'COPY ALL', 1500);
     });
 }
