@@ -1,127 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>TDK Security</title>
+<title>Teste de Abertura de Abas</title>
 
 <style>
-
-body{
-    margin:0;
-    height:100vh;
-    background:#050505;
-    font-family:Arial,sans-serif;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
+body {
+    margin: 0;
+    background: #1e1e1e;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
-.box{
-    text-align:center;
-    background:#111;
-    padding:30px;
-    border-radius:20px;
-    min-width:280px;
+#desktop {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
 }
 
-.loader{
-    width:45px;
-    height:45px;
-    border:5px solid #333;
-    border-top:5px solid white;
-    border-radius:50%;
-    animation:girar 1s linear infinite;
-    margin:20px auto;
+.window {
+    position: absolute;
+    width: 300px;
+    height: 200px;
+    background: #fff;
+    border: 1px solid #333;
+    box-shadow: 0 10px 25px rgba(0,0,0,.6);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer; /* Mostra que a janela inteira é clicável */
+    transition: transform 0.2s;
 }
 
-@keyframes girar{
-
-100%{
-    transform:rotate(360deg);
+.window:hover {
+    transform: scale(1.02);
 }
 
+.titlebar {
+    height: 30px;
+    background: #0078d7; /* Cor de destaque */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: bold;
 }
 
+.content {
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.hint {
+    margin-top: 20px;
+    color: #666;
+    font-size: 11px;
+}
 </style>
-
 </head>
-
 
 <body>
 
-
-<div id="container"></div>
-
+<div id="desktop"></div>
 
 <script>
+let windowCount = 0;
 
+function createTestWindow() {
+    windowCount++;
+    
+    const w = document.createElement("div");
+    w.className = "window";
 
-const APP_NAME = "tdk_";
+    w.style.left = (Math.random() * 60) + "vw";
+    w.style.top  = (Math.random() * 60) + "vh";
 
-let ua = navigator.userAgent.toLowerCase();
+    w.innerHTML = `
+        <div class="titlebar">
+            <span>Teste ${windowCount}</span>
+        </div>
+        <div class="content">
+            <p><strong>Clique aqui</strong> para abrir uma aba real</p>
+            <p class="hint">URL: google.com</p>
+        </div>
+    `;
 
-let params = new URLSearchParams(window.location.search);
+    // EVENTO DE CLIQUE: Essencial para burlar o bloqueador de pop-ups
+    w.addEventListener('click', () => {
+        // '_blank' força abrir uma nova aba.
+        // No PC, se o navegador permitir, adicionar parâmetros como 'width=600' tentaria abrir uma janela externa,
+        // mas no Celular sempre abrirá como uma nova aba comum.
+        window.open('https://www.google.com', '_blank');
+    });
 
-let app = params.get("app");
+    document.getElementById("desktop").appendChild(w);
 
-
-// valida app
-
-let autorizado =
-app === APP_NAME ||
-ua.includes(APP_NAME);
-
-
-
-if(autorizado){
-
-
-document.getElementById("container").innerHTML = `
-
-<div class="box">
-
-<div class="loader"></div>
-
-<h2>Verificando ambiente...</h2>
-
-</div>
-
-`;
-
-
-setTimeout(()=>{
-
-window.location.replace(
-"https://tdk000999.base44.app"
-);
-
-},1500);
-
-
-
-}else{
-
-
-// sem autorização
-
-setInterval(()=>{
-
-location.reload();
-
-},1000);
-
-
+    // Cria apenas até 5 janelas de teste na tela para não poluir
+    if (windowCount < 5) {
+        setTimeout(createTestWindow, 800);
+    }
 }
 
-
-
+// Inicia o gerador de janelas de teste
+createTestWindow();
 </script>
-
 
 </body>
 </html>
