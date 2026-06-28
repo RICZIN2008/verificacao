@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TDK Security</title>
+
 <style>
 body {
     margin: 0;
@@ -11,6 +12,7 @@ body {
     background: #050505;
     overflow: hidden;
 }
+
 #lock {
     display: none;
     position: fixed;
@@ -18,6 +20,7 @@ body {
     background: #050505;
     z-index: 99999;
 }
+
 .box {
     text-align: center;
     background: #111;
@@ -31,6 +34,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
 .loader {
     width: 45px;
     height: 45px;
@@ -40,40 +44,77 @@ body {
     animation: girar 1s linear infinite;
     margin: 20px auto;
 }
-@keyframes girar { 100% { transform: rotate(360deg); } }
+
+@keyframes girar {
+    100% {
+        transform: rotate(360deg);
+    }
+}
 </style>
+
 </head>
+
 <body>
 
-<div id="lock"></div>
+<div id="lock">
+</div>
 
 <div class="box">
     <div class="loader"></div>
     <h2>Verificando ambiente...</h2>
 </div>
 
+
 <script>
-(function() {
+
+(function(){
+
     const UA = navigator.userAgent;
-    const PARAM = new URLSearchParams(location.search).get('app');
-    
-    // Detecta WebView: Android tem "Version/X.X Chrome" sem "Chrome/" 
-    // ou tem "wv" em versões novas
-    const ehAndroidWebView = /Android.*Version\/[\d.]+.*Chrome\/[\d.]+ Mobile(?!.*Chrome\/)/i.test(UA) || UA.includes('; wv');
-    
-    // Se NÃO for WebView e NÃO tiver param = bloqueia
-    if (!ehAndroidWebView && PARAM !== 'tdk_') {
-        document.getElementById('lock').style.display = 'block';
-        document.querySelector('.box').remove();
-        throw new Error('Blocked');
+
+    // Detecta Android WebView (AppMint e similares)
+    const ehAndroid = /Android/i.test(UA);
+
+    const ehWebView = ehAndroid && (
+        UA.includes("wv") ||
+        UA.includes("WebView") ||
+        !UA.includes("Chrome")
+    );
+
+
+    // Permite navegador somente com parâmetro
+    const PARAM = new URLSearchParams(location.search).get("app");
+
+
+    // Bloqueia fora do app
+    if(!ehWebView && PARAM !== "tdk_"){
+
+        document.getElementById("lock").style.display = "block";
+
+        document.querySelector(".box").innerHTML =
+        `
+        <h2 style="color:red">
+        Acesso permitido somente pelo APP
+        </h2>
+        `;
+
+        throw new Error("Bloqueado");
+
     }
-    
-    // Se passou, redireciona
-    setTimeout(() => {
-        location.replace("https://tdk000999.base44.app");
-    }, 1500);
+
+
+    // Abre o site
+    setTimeout(function(){
+
+        window.location.href =
+        "https://tdk000999.base44.app";
+
+    },1500);
+
+
 })();
+
 </script>
+
 
 </body>
 </html>
