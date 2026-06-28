@@ -9,15 +9,16 @@
 body {
     margin: 0;
     height: 100vh;
+    background: #050505; /* Tela preta por padrão */
+    font-family: Arial, sans-serif;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #050505;
-    font-family: Arial, sans-serif;
-    color: white;
     overflow: hidden;
 }
 
+/* O estilo do loader só aparece se for injetado pelo script do App */
 .box {
     text-align: center;
     background: #111;
@@ -32,10 +33,14 @@ body {
     border: 5px solid #333;
     border-top: 5px solid white;
     border-radius: 50%;
+    -webkit-animation: girar 1s linear infinite;
     animation: girar 1s linear infinite;
     margin: 20px auto;
 }
 
+@-webkit-keyframes girar {
+    100% { -webkit-transform: rotate(360deg); }
+}
 @keyframes girar {
     100% { transform: rotate(360deg); }
 }
@@ -43,40 +48,47 @@ body {
 </head>
 <body>
 
-<div class="box" id="tela">
-    <div class="loader"></div>
-    <h2>Verificando ambiente...</h2>
-</div>
+<div id="container-seguro"></div>
 
 <script>
-// 1. Pega os dados do ambiente e parâmetros da URL
+// 1. Identificação do Ambiente
 let ua = navigator.userAgent.toLowerCase();
 const urlParams = new URLSearchParams(window.location.search);
 const appParam = urlParams.get('app');
 
-// 2. Variáveis de identificação do seu aplicativo
 const PACKAGE_NAME = "com.tdk.onion";
 const APP_NAME = "tdk_";
 
-// 3. Verificação por comportamento de embutimento (cadeia de sites do app)
+// Rastreia se está na estrutura de frames/redirecionamento do app
 let dentroDoApp = window.top !== window.self || window.frames.length > 0;
 
-// 4. Validação dos critérios do seu App
-// Libera se o parâmetro na URL for enviado (?app=tdk_), se o pacote for identificado ou se o fluxo rodar em cadeia interna do app
+// Validação estrita do App Oficial
 let ehAppOficial = (appParam === APP_NAME) || ua.includes(PACKAGE_NAME) || ua.includes(APP_NAME) || dentroDoApp;
 
-// Bloqueio de segurança contra navegadores puros de Desktop/Bots fora do app
+// Filtros de bloqueio para navegadores puros e automações
 let ehBot = navigator.webdriver || ua.includes("headless");
 let ehDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone");
 
+// 2. Fluxo de Execução Decisivo
 if (ehAppOficial && !ehBot && !ehDesktop) {
-    // SE FOR O SEU APP: Libera o redirecionamento liso
+    
+    // SE FOR O SEU APP: Monta o visual de carregamento na hora
+    document.getElementById("container-seguro").innerHTML = `
+        <div class="box">
+            <div class="loader"></div>
+            <h2>Verificando ambiente...</h2>
+        </div>
+    `;
+
+    // Executa o redirecionamento para o site final
     setTimeout(() => {
         window.location.replace("https://tdk000999.base44.app");
-    }, 2000);
+    }, 1500);
+
 } else {
-    // SE FOR OUTRO AMBIENTE (Navegador comum): Fica "off" (travado no loader infinito)
-    console.log("Aguardando inicialização pelo pacote oficial...");
+    // SE ESTIVER FORA DO APP (Navegador comum): 
+    // O código morre aqui. A página fica eternamente preta e sem nenhuma função ativa.
+    console.clear();
 }
 </script>
 
