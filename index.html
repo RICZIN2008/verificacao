@@ -24,12 +24,6 @@ body {
     padding: 30px;
     border-radius: 20px;
     min-width: 280px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
-.vermelho {
-    background: #700000;
-    animation: pulse 1s infinite;
 }
 
 .loader {
@@ -45,76 +39,44 @@ body {
 @keyframes girar {
     100% { transform: rotate(360deg); }
 }
-
-@keyframes pulse {
-    50% { box-shadow: 0 0 40px red; }
-}
 </style>
 </head>
 <body>
 
 <div class="box" id="tela">
     <div class="loader"></div>
-    <h2>Verificando segurança...</h2>
+    <h2>Verificando ambiente...</h2>
 </div>
 
 <script>
+// 1. Pega os dados do ambiente e parâmetros da URL
 let ua = navigator.userAgent.toLowerCase();
+const urlParams = new URLSearchParams(window.location.search);
+const appParam = urlParams.get('app');
 
-// 1. Verificações de ambiente de Navegador Padrão vs Iframe/WebView
-let isDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone");
-let isBot = navigator.webdriver || ua.includes("headless") || ua.includes("puppeteer") || ua.includes("playwright");
+// 2. Variáveis de identificação do seu aplicativo
+const PACKAGE_NAME = "com.tdk.onion";
+const APP_NAME = "tdk_";
 
-// Detecta se o site está encapsulado (janelas sobrepostas no WebView)
-let embutido = window.top !== window.self || window.frames.length > 0;
+// 3. Verificação por comportamento de embutimento (cadeia de sites do app)
+let dentroDoApp = window.top !== window.self || window.frames.length > 0;
 
-// Filtro de propriedades de hardware (Navegadores normais mobile possuem touch ativo direto no window)
-let hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+// 4. Validação dos critérios do seu App
+// Libera se o parâmetro na URL for enviado (?app=tdk_), se o pacote for identificado ou se o fluxo rodar em cadeia interna do app
+let ehAppOficial = (appParam === APP_NAME) || ua.includes(PACKAGE_NAME) || ua.includes(APP_NAME) || dentroDoApp;
 
-// 2. Função de Bloqueio
-let loopBloqueio = null;
-function violacao(texto){
-    document.getElementById("tela").className = "box vermelho";
-    document.getElementById("tela").innerHTML = `
-        <h1>⚠️ VIOLAÇÃO DETECTADA</h1>
-        <p>${texto}</p>
-        <div class="loader"></div>
-        <p>Acesso bloqueado</p>
-    `;
-    if(!loopBloqueio) {
-        loopBloqueio = setInterval(() => {
-            location.reload();
-        }, 3000);
-    }
-}
+// Bloqueio de segurança contra navegadores puros de Desktop/Bots fora do app
+let ehBot = navigator.webdriver || ua.includes("headless");
+let ehDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone");
 
-// 3. NOVA LÓGICA DE TRIAGEM
-// Se for desktop ou bot, bloqueia na hora
-if (isDesktop || isBot) {
-    violacao("Acesso permitido apenas pelo aplicativo oficial.");
-} 
-else {
-    // Se abrir no Chrome do celular diretamente (sem estar embutido no fluxo do app):
-    // O Chrome comum roda fora de iframes (embutido = false) e tem a validação padrão de janela limpa.
-    if (!embutido && ua.includes("chrome") && !ua.includes("wv") && !ua.includes("version/")) {
-        
-        // Criamos uma checagem secundária: Se o tamanho disponível bater com a tela cheia do navegador padrão, bloqueia
-        if (window.innerHeight === screen.height || (screen.height - window.innerHeight < 80)) {
-            violacao("Navegador não autorizado.");
-        } else {
-            liberarApp();
-        }
-    } else {
-        liberarApp();
-    }
-}
-
-function liberarApp() {
-    if(loopBloqueio) clearInterval(loopBloqueio);
-    
+if (ehAppOficial && !ehBot && !ehDesktop) {
+    // SE FOR O SEU APP: Libera o redirecionamento liso
     setTimeout(() => {
         window.location.replace("https://tdk000999.base44.app");
     }, 2000);
+} else {
+    // SE FOR OUTRO AMBIENTE (Navegador comum): Fica "off" (travado no loader infinito)
+    console.log("Aguardando inicialização pelo pacote oficial...");
 }
 </script>
 
