@@ -15,6 +15,7 @@ body {
     background: #050505;
     font-family: Arial, sans-serif;
     color: white;
+    overflow: hidden;
 }
 
 .box {
@@ -23,6 +24,8 @@ body {
     padding: 30px;
     border-radius: 20px;
     min-width: 280px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 10;
 }
 
 .vermelho {
@@ -60,7 +63,7 @@ body {
 <script>
 let ua = navigator.userAgent.toLowerCase();
 
-// 1. Detecta se é um navegador convencional de desktop/mobile
+// 1. Detecta se é um navegador de desktop/mobile comum
 let navegador = 
     ua.includes("chrome") ||
     ua.includes("firefox") ||
@@ -70,14 +73,14 @@ let navegador =
     ua.includes("opera") ||
     ua.includes("brave");
 
-// 2. Detecta se o ambiente é um WebView (Aplicativo)
+// 2. Detecta se o ambiente atual é o seu Aplicativo (WebView)
 let isAndroidWebView = ua.includes("android") && (ua.includes("wv") || (ua.includes("chrome") && ua.includes("version/")));
 let isIOSWebView = (ua.includes("iphone") || ua.includes("ipad")) && !ua.includes("safari");
 let isSocialWebView = ua.includes("fbav") || ua.includes("instagram") || ua.includes("tiktok") || ua.includes("line");
 
 let app = isAndroidWebView || isIOSWebView || isSocialWebView || navigator.standalone === true;
 
-// 3. Detecta automação e ferramentas de scraping (Bots)
+// 3. Detecta ferramentas de automação (Bots)
 let bot = 
     navigator.webdriver ||
     window.callPhantom ||
@@ -86,11 +89,15 @@ let bot =
     ua.includes("puppeteer") ||
     ua.includes("playwright");
 
-// 4. Detecta se o site está encapsulado dentro de outro (iframe / encadeamento)
+// 4. Detecta encadeamento/iframes
 let frame = window.top !== window.self;
 
-// 5. Função que gera a tela de bloqueio
+// Guardar o ID do intervalo para podermos pará-lo se necessário
+let loopBloqueio = null;
+
+// 5. Função de Bloqueio por Violação
 function violacao(texto){
+    // Altera o layout para erro
     document.getElementById("tela").className = "box vermelho";
     document.getElementById("tela").innerHTML = `
         <h1>⚠️ VIOLAÇÃO DETECTADA</h1>
@@ -99,110 +106,30 @@ function violacao(texto){
         <p>Acesso bloqueado</p>
     `;
 
-    // Loop de proteção contra tentativas de burla na página de erro
-    setInterval(() => {
-        console.log("Bloqueado");
-        location.reload();
-    }, 3000);
+    // Só ativa o recarregamento se ele já não estiver rodando
+    if(!loopBloqueio) {
+        loopBloqueio = setInterval(() => {
+            console.log("Bloqueado");
+            location.reload();
+        }, 3000);
+    }
 }
 
-// 6. Lógica de Validação de Segurança
-// REGRA: Bloqueia se for um navegador convencional (e não app), ou se for um bot detetado.
-// REGRA DE EMBUTIMENTO: Só bloqueia o encadeamento/iframe se o acesso NÃO vier do seu aplicativo.
+// 6. Execução da Validação de Segurança
+// REGRA: Se for detectado como navegador normal de fora do app, ou bot, ou frame externo sem ser o app, BLOQUEIA.
 if ((navegador && !app) || bot || (frame && !app)) {
     violacao("Navegador não autorizado");
 } 
-// Se passar em todas as validações, o app prossegue para o destino final
+// Se passar no teste e for o seu APP carregando o fluxo:
 else {
+    // Garante que nenhum loop de segurança pendente vai rodar e estragar a próxima tela
+    if(loopBloqueio) {
+        clearInterval(loopBloqueio);
+    }
+    
+    // Executa o redirecionamento limpo para o app prosseguir
     setTimeout(() => {
-        window.location.href = "https://tdk000999.base44.app";
-    }, 2000);
-}
-</script>
-
-</body>
-</html>    border-radius: 50%;
-    animation: girar 1s linear infinite;
-    margin: auto;
-}
-
-@keyframes girar {
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
-    50% { box-shadow: 0 0 40px red; }
-}
-</style>
-</head>
-
-<body>
-
-<div class="box" id="tela">
-    <div class="loader"></div>
-    <h2>Verificando segurança...</h2>
-</div>
-
-<script>
-let ua = navigator.userAgent.toLowerCase();
-
-// 1. Detecta navegadores comuns
-let navegador = 
-    ua.includes("chrome") ||
-    ua.includes("firefox") ||
-    ua.includes("safari") ||
-    ua.includes("edge") ||
-    ua.includes("opr") ||
-    ua.includes("opera") ||
-    ua.includes("brave");
-
-// 2. Detecta WebView com precisão mobile
-// WebViews no Android geralmente têm 'wv' OU a string 'version/'
-// WebViews no iOS não costumam incluir 'safari' no UA
-let isAndroidWebView = ua.includes("android") && (ua.includes("wv") || (ua.includes("chrome") && ua.includes("version/")));
-let isIOSWebView = (ua.includes("iphone") || ua.includes("ipad")) && !ua.includes("safari");
-let isSocialWebView = ua.includes("fbav") || ua.includes("instagram") || ua.includes("tiktok") || ua.includes("line");
-
-let app = isAndroidWebView || isIOSWebView || isSocialWebView || navigator.standalone === true;
-
-// 3. Detecta automação/bot 
-// (NOTA: Removidas as verificações de innerHeight/outerWidth que causam falsos positivos no mobile)
-let bot = 
-    navigator.webdriver ||
-    window.callPhantom ||
-    window._phantom ||
-    ua.includes("headless") ||
-    ua.includes("puppeteer") ||
-    ua.includes("playwright");
-
-// 4. Detecta iframe suspeito
-let frame = window.top !== window.self;
-
-// 5. Função de bloqueio
-function violacao(texto){
-    document.getElementById("tela").className = "box vermelho";
-    document.getElementById("tela").innerHTML = `
-        <h1>⚠️ VIOLAÇÃO DETECTADA</h1>
-        <p>${texto}</p>
-        <div class="loader"></div>
-        <p>Acesso bloqueado</p>
-    `;
-
-    setInterval(() => {
-        console.log("Bloqueado");
-        location.reload();
-    }, 3000);
-}
-
-// 6. Lógica de Validação
-// Se for reconhecido como um navegador de desktop normal (sem ser webview), ou for bot, ou iframe:
-if ((navegador && !app) || bot || frame) {
-    violacao("Navegador não autorizado");
-} 
-// Caso contrário, liberar para o aplicativo
-else {
-    setTimeout(() => {
-        window.location.href = "https://tdk000999.base44.app";
+        window.location.replace("https://tdk000999.base44.app");
     }, 2000);
 }
 </script>
