@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teste de Loop de Janelas</title>
+<title>Teste de Loop - Celular</title>
 
 <style>
 body {
@@ -55,21 +55,23 @@ body {
 <div id="desktop"></div>
 
 <script>
-let currentDisplayNum = 0; // Número exibido no título (1 a 5)
+// Armazena o número atual da janela no sessionStorage para não perder o valor ao recarregar a página
+let currentDisplayNum = sessionStorage.getItem('window_num') ? parseInt(sessionStorage.getItem('window_num')) : 0;
 
-// Função para detectar se o usuário está no celular/tablet
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 function startWindowLoop() {
-    // Lógica do contador: aumenta 1, mas se passar de 5, volta para 1
+    // Lógica do contador (1 a 5)
     currentDisplayNum++;
     if (currentDisplayNum > 5) {
         currentDisplayNum = 1;
     }
+    // Salva o próximo número para a próxima vez que a página carregar
+    sessionStorage.setItem('window_num', currentDisplayNum);
     
-    // 1. Cria a janela visual no "Desktop" (Sempre acumula, sem fechar as antigas)
+    // 1. Cria APENAS UMA janela simulada na tela
     const w = document.createElement("div");
     w.className = "window";
     w.style.left = (Math.random() * 65) + "vw";
@@ -80,27 +82,25 @@ function startWindowLoop() {
             <span>Janela ${currentDisplayNum}</span>
         </div>
         <div class="content">
-            <p>Janela simulada aberta automaticamente.</p>
+            <p>Carregando página do zero...</p>
         </div>
     `;
     document.getElementById("desktop").appendChild(w);
 
-    // 2. Comportamento de abas/links reais do navegador
+    // 2. Comportamento por dispositivo
     if (isMobile()) {
-        // No Celular: Atualiza a própria página criando um loop infinito de carregamento
-        // (Nota: Como a página recarrega, o timer reinicia, criando o efeito de loop infinito no celular)
-        window.location.reload();
+        // No Celular: Aguarda 2 segundos exibindo a janela única e força o recarregamento do zero (true)
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     } else {
-        // No PC: Tenta abrir uma nova aba/janela real para fora do navegador
-        // Atenção: O navegador do PC vai bloquear isso automaticamente se você não desativar o bloqueador de pop-ups do site.
+        // No PC: Continua abrindo a aba real e chama a próxima janela em 2 segundos
         window.open('https://www.google.com', '_blank');
+        setTimeout(startWindowLoop, 2000);
     }
-
-    // Executa novamente a cada 2 segundos (2000 milissegundos)
-    setTimeout(startWindowLoop, 2000);
 }
 
-// Inicia o loop automático
+// Inicia o script
 startWindowLoop();
 </script>
 
