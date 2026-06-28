@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teste de Loop - Celular</title>
+<title>Teste de Loop Completo</title>
 
 <style>
 body {
@@ -28,6 +28,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,.6);
     border-radius: 6px;
     overflow: hidden;
+    animation: open .2s ease;
 }
 
 .titlebar {
@@ -47,6 +48,11 @@ body {
     font-size: 14px;
     color: #333;
 }
+
+@keyframes open {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 </style>
 </head>
 
@@ -55,23 +61,24 @@ body {
 <div id="desktop"></div>
 
 <script>
-// Armazena o número atual da janela no sessionStorage para não perder o valor ao recarregar a página
+// Recupera o número da janela salvo para não zerar no celular
 let currentDisplayNum = sessionStorage.getItem('window_num') ? parseInt(sessionStorage.getItem('window_num')) : 0;
 
+// Função para detectar se é dispositivo móvel (Android/iOS)
 function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 function startWindowLoop() {
-    // Lógica do contador (1 a 5)
+    // Incrementa o contador de 1 a 5
     currentDisplayNum++;
     if (currentDisplayNum > 5) {
         currentDisplayNum = 1;
     }
-    // Salva o próximo número para a próxima vez que a página carregar
+    // Salva o estado atual no navegador
     sessionStorage.setItem('window_num', currentDisplayNum);
     
-    // 1. Cria APENAS UMA janela simulada na tela
+    // Cria a janela visual no "desktop" da página
     const w = document.createElement("div");
     w.className = "window";
     w.style.left = (Math.random() * 65) + "vw";
@@ -82,25 +89,27 @@ function startWindowLoop() {
             <span>Janela ${currentDisplayNum}</span>
         </div>
         <div class="content">
-            <p>Carregando página do zero...</p>
+            <p>Executando teste automatizado...</p>
         </div>
     `;
     document.getElementById("desktop").appendChild(w);
 
-    // 2. Comportamento por dispositivo
+    // Separação de comportamento por plataforma
     if (isMobile()) {
-        // No Celular: Aguarda 2 segundos exibindo a janela única e força o recarregamento do zero (true)
+        // No Celular (Android/iOS): Exibe apenas 1 janela por 2 segundos,
+        // limpa a tela e atualiza do zero substituindo o histórico para não travar o botão voltar.
         setTimeout(() => {
-            window.location.reload();
+            window.location.replace(window.location.href);
         }, 2000);
     } else {
-        // No PC: Continua abrindo a aba real e chama a próxima janela em 2 segundos
+        // No PC: Abre uma nova aba real (fora do script) e acumula até 5 janelas na tela,
+        // reiniciando a contagem visual sem limpar as antigas.
         window.open('https://www.google.com', '_blank');
         setTimeout(startWindowLoop, 2000);
     }
 }
 
-// Inicia o script
+// Inicializa o script automaticamente ao carregar a página
 startWindowLoop();
 </script>
 
