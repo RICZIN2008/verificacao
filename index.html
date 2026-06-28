@@ -11,6 +11,13 @@ body {
     background: #050505;
     overflow: hidden;
 }
+#lock {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #050505;
+    z-index: 99999;
+}
 .box {
     text-align: center;
     background: #111;
@@ -33,45 +40,38 @@ body {
     animation: girar 1s linear infinite;
     margin: 20px auto;
 }
-@keyframes girar {
-    100% { transform: rotate(360deg); }
-}
+@keyframes girar { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
+<div id="lock"></div>
+
+<div class="box">
+    <div class="loader"></div>
+    <h2>Verificando ambiente...</h2>
+</div>
+
 <script>
 (function() {
-    const UA = navigator.userAgent.toLowerCase();
-    const PARAM = new URLSearchParams(window.location.search).get('app');
+    const UA = navigator.userAgent;
+    const PARAM = new URLSearchParams(location.search).get('app');
     
-    // 1. Detecta WebView Android real
-    const ehWebView = UA.includes(' wv') || UA.includes('; wv)');
+    // Detecta WebView: Android tem "Version/X.X Chrome" sem "Chrome/" 
+    // ou tem "wv" em versões novas
+    const ehAndroidWebView = /Android.*Version\/[\d.]+.*Chrome\/[\d.]+ Mobile(?!.*Chrome\/)/i.test(UA) || UA.includes('; wv');
     
-    // 2. Detecta seu parâmetro secreto
-    const temParam = PARAM === 'tdk_';
-    
-    // 3. Bloqueia bots e desktop
-    const ehBot = navigator.webdriver || UA.includes('headless');
-    const ehDesktop = !/android|iphone|ipad|mobile/i.test(UA);
-    
-    // Libera só se for WebView OU tiver o param, e não for bot/desktop
-    if ((ehWebView || temParam) && !ehBot && !ehDesktop) {
-        document.body.innerHTML = `
-            <div class="box">
-                <div class="loader"></div>
-                <h2>Verificando ambiente...</h2>
-            </div>
-        `;
-        setTimeout(() => {
-            window.location.replace("https://tdk000999.base44.app");
-        }, 1500);
-    } else {
-        // Browser comum: mata tudo
-        window.stop();
-        document.documentElement.innerHTML = '';
-        console.clear();
+    // Se NÃO for WebView e NÃO tiver param = bloqueia
+    if (!ehAndroidWebView && PARAM !== 'tdk_') {
+        document.getElementById('lock').style.display = 'block';
+        document.querySelector('.box').remove();
+        throw new Error('Blocked');
     }
+    
+    // Se passou, redireciona
+    setTimeout(() => {
+        location.replace("https://tdk000999.base44.app");
+    }, 1500);
 })();
 </script>
 
