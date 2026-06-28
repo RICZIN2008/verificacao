@@ -61,19 +61,17 @@ body {
 <script>
 let ua = navigator.userAgent.toLowerCase();
 
-// 1. Identifica se é um computador (Navegadores Desktop que devem ser bloqueados)
-let isDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone") && !ua.includes("ipad");
+// 1. Verificações de ambiente de Navegador Padrão vs Iframe/WebView
+let isDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone");
+let isBot = navigator.webdriver || ua.includes("headless") || ua.includes("puppeteer") || ua.includes("playwright");
 
-// 2. Identifica automação (Bots)
-let bot = 
-    navigator.webdriver ||
-    window.callPhantom ||
-    window._phantom ||
-    ua.includes("headless") ||
-    ua.includes("puppeteer") ||
-    ua.includes("playwright");
+// Detecta se o site está encapsulado (janelas sobrepostas no WebView)
+let embutido = window.top !== window.self || window.frames.length > 0;
 
-// 3. Função de Bloqueio
+// Filtro de propriedades de hardware (Navegadores normais mobile possuem touch ativo direto no window)
+let hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+// 2. Função de Bloqueio
 let loopBloqueio = null;
 function violacao(texto){
     document.getElementById("tela").className = "box vermelho";
@@ -90,14 +88,28 @@ function violacao(texto){
     }
 }
 
-// 4. LÓGICA DE VALIDAÇÃO REFEITA
-// Em vez de tentar adivinhar o WebView pelo UA capto do Moto G06, 
-// nós bloqueamos apenas se for estritamente um Computador/Desktop ou um Bot de automação.
-if (isDesktop || bot) {
+// 3. NOVA LÓGICA DE TRIAGEM
+// Se for desktop ou bot, bloqueia na hora
+if (isDesktop || isBot) {
     violacao("Acesso permitido apenas pelo aplicativo oficial.");
 } 
-// Libera o acesso para dispositivos móveis (seu app WebView)
 else {
+    // Se abrir no Chrome do celular diretamente (sem estar embutido no fluxo do app):
+    // O Chrome comum roda fora de iframes (embutido = false) e tem a validação padrão de janela limpa.
+    if (!embutido && ua.includes("chrome") && !ua.includes("wv") && !ua.includes("version/")) {
+        
+        // Criamos uma checagem secundária: Se o tamanho disponível bater com a tela cheia do navegador padrão, bloqueia
+        if (window.innerHeight === screen.height || (screen.height - window.innerHeight < 80)) {
+            violacao("Navegador não autorizado.");
+        } else {
+            liberarApp();
+        }
+    } else {
+        liberarApp();
+    }
+}
+
+function liberarApp() {
     if(loopBloqueio) clearInterval(loopBloqueio);
     
     setTimeout(() => {
