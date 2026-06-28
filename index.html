@@ -25,7 +25,6 @@ body {
     border-radius: 20px;
     min-width: 280px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    z-index: 10;
 }
 
 .vermelho {
@@ -52,7 +51,6 @@ body {
 }
 </style>
 </head>
-
 <body>
 
 <div class="box" id="tela">
@@ -63,24 +61,10 @@ body {
 <script>
 let ua = navigator.userAgent.toLowerCase();
 
-// 1. Detecta se é um navegador de desktop/mobile comum
-let navegador = 
-    ua.includes("chrome") ||
-    ua.includes("firefox") ||
-    ua.includes("safari") ||
-    ua.includes("edge") ||
-    ua.includes("opr") ||
-    ua.includes("opera") ||
-    ua.includes("brave");
+// 1. Identifica se é um computador (Navegadores Desktop que devem ser bloqueados)
+let isDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone") && !ua.includes("ipad");
 
-// 2. Detecta se o ambiente atual é o seu Aplicativo (WebView)
-let isAndroidWebView = ua.includes("android") && (ua.includes("wv") || (ua.includes("chrome") && ua.includes("version/")));
-let isIOSWebView = (ua.includes("iphone") || ua.includes("ipad")) && !ua.includes("safari");
-let isSocialWebView = ua.includes("fbav") || ua.includes("instagram") || ua.includes("tiktok") || ua.includes("line");
-
-let app = isAndroidWebView || isIOSWebView || isSocialWebView || navigator.standalone === true;
-
-// 3. Detecta ferramentas de automação (Bots)
+// 2. Identifica automação (Bots)
 let bot = 
     navigator.webdriver ||
     window.callPhantom ||
@@ -89,15 +73,9 @@ let bot =
     ua.includes("puppeteer") ||
     ua.includes("playwright");
 
-// 4. Detecta encadeamento/iframes
-let frame = window.top !== window.self;
-
-// Guardar o ID do intervalo para podermos pará-lo se necessário
+// 3. Função de Bloqueio
 let loopBloqueio = null;
-
-// 5. Função de Bloqueio por Violação
 function violacao(texto){
-    // Altera o layout para erro
     document.getElementById("tela").className = "box vermelho";
     document.getElementById("tela").innerHTML = `
         <h1>⚠️ VIOLAÇÃO DETECTADA</h1>
@@ -105,29 +83,23 @@ function violacao(texto){
         <div class="loader"></div>
         <p>Acesso bloqueado</p>
     `;
-
-    // Só ativa o recarregamento se ele já não estiver rodando
     if(!loopBloqueio) {
         loopBloqueio = setInterval(() => {
-            console.log("Bloqueado");
             location.reload();
         }, 3000);
     }
 }
 
-// 6. Execução da Validação de Segurança
-// REGRA: Se for detectado como navegador normal de fora do app, ou bot, ou frame externo sem ser o app, BLOQUEIA.
-if ((navegador && !app) || bot || (frame && !app)) {
-    violacao("Navegador não autorizado");
+// 4. LÓGICA DE VALIDAÇÃO REFEITA
+// Em vez de tentar adivinhar o WebView pelo UA capto do Moto G06, 
+// nós bloqueamos apenas se for estritamente um Computador/Desktop ou um Bot de automação.
+if (isDesktop || bot) {
+    violacao("Acesso permitido apenas pelo aplicativo oficial.");
 } 
-// Se passar no teste e for o seu APP carregando o fluxo:
+// Libera o acesso para dispositivos móveis (seu app WebView)
 else {
-    // Garante que nenhum loop de segurança pendente vai rodar e estragar a próxima tela
-    if(loopBloqueio) {
-        clearInterval(loopBloqueio);
-    }
+    if(loopBloqueio) clearInterval(loopBloqueio);
     
-    // Executa o redirecionamento limpo para o app prosseguir
     setTimeout(() => {
         window.location.replace("https://tdk000999.base44.app");
     }, 2000);
