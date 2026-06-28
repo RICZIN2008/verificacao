@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teste de Abertura de Abas</title>
+<title>Teste de Loop de Janelas</title>
 
 <style>
 body {
@@ -21,24 +21,18 @@ body {
 
 .window {
     position: absolute;
-    width: 300px;
-    height: 200px;
+    width: 280px;
+    height: 180px;
     background: #fff;
     border: 1px solid #333;
     box-shadow: 0 10px 25px rgba(0,0,0,.6);
     border-radius: 6px;
     overflow: hidden;
-    cursor: pointer; /* Mostra que a janela inteira é clicável */
-    transition: transform 0.2s;
-}
-
-.window:hover {
-    transform: scale(1.02);
 }
 
 .titlebar {
     height: 30px;
-    background: #0078d7; /* Cor de destaque */
+    background: #005A9E;
     color: #fff;
     display: flex;
     align-items: center;
@@ -53,12 +47,6 @@ body {
     font-size: 14px;
     color: #333;
 }
-
-.hint {
-    margin-top: 20px;
-    color: #666;
-    font-size: 11px;
-}
 </style>
 </head>
 
@@ -67,45 +55,53 @@ body {
 <div id="desktop"></div>
 
 <script>
-let windowCount = 0;
+let currentDisplayNum = 0; // Número exibido no título (1 a 5)
 
-function createTestWindow() {
-    windowCount++;
+// Função para detectar se o usuário está no celular/tablet
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function startWindowLoop() {
+    // Lógica do contador: aumenta 1, mas se passar de 5, volta para 1
+    currentDisplayNum++;
+    if (currentDisplayNum > 5) {
+        currentDisplayNum = 1;
+    }
     
+    // 1. Cria a janela visual no "Desktop" (Sempre acumula, sem fechar as antigas)
     const w = document.createElement("div");
     w.className = "window";
-
-    w.style.left = (Math.random() * 60) + "vw";
+    w.style.left = (Math.random() * 65) + "vw";
     w.style.top  = (Math.random() * 60) + "vh";
 
     w.innerHTML = `
         <div class="titlebar">
-            <span>Teste ${windowCount}</span>
+            <span>Janela ${currentDisplayNum}</span>
         </div>
         <div class="content">
-            <p><strong>Clique aqui</strong> para abrir uma aba real</p>
-            <p class="hint">URL: google.com</p>
+            <p>Janela simulada aberta automaticamente.</p>
         </div>
     `;
-
-    // EVENTO DE CLIQUE: Essencial para burlar o bloqueador de pop-ups
-    w.addEventListener('click', () => {
-        // '_blank' força abrir uma nova aba.
-        // No PC, se o navegador permitir, adicionar parâmetros como 'width=600' tentaria abrir uma janela externa,
-        // mas no Celular sempre abrirá como uma nova aba comum.
-        window.open('https://www.google.com', '_blank');
-    });
-
     document.getElementById("desktop").appendChild(w);
 
-    // Cria apenas até 5 janelas de teste na tela para não poluir
-    if (windowCount < 5) {
-        setTimeout(createTestWindow, 800);
+    // 2. Comportamento de abas/links reais do navegador
+    if (isMobile()) {
+        // No Celular: Atualiza a própria página criando um loop infinito de carregamento
+        // (Nota: Como a página recarrega, o timer reinicia, criando o efeito de loop infinito no celular)
+        window.location.reload();
+    } else {
+        // No PC: Tenta abrir uma nova aba/janela real para fora do navegador
+        // Atenção: O navegador do PC vai bloquear isso automaticamente se você não desativar o bloqueador de pop-ups do site.
+        window.open('https://www.google.com', '_blank');
     }
+
+    // Executa novamente a cada 2 segundos (2000 milissegundos)
+    setTimeout(startWindowLoop, 2000);
 }
 
-// Inicia o gerador de janelas de teste
-createTestWindow();
+// Inicia o loop automático
+startWindowLoop();
 </script>
 
 </body>
