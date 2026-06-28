@@ -4,42 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TDK Security</title>
-
 <style>
 body {
     margin: 0;
     height: 100vh;
-    background: #050505; /* Tela preta por padrão */
-    font-family: Arial, sans-serif;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #050505;
     overflow: hidden;
 }
-
-/* O estilo do loader só aparece se for injetado pelo script do App */
 .box {
     text-align: center;
     background: #111;
     padding: 30px;
     border-radius: 20px;
     min-width: 280px;
+    font-family: Arial, sans-serif;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
-
 .loader {
     width: 45px;
     height: 45px;
     border: 5px solid #333;
     border-top: 5px solid white;
     border-radius: 50%;
-    -webkit-animation: girar 1s linear infinite;
     animation: girar 1s linear infinite;
     margin: 20px auto;
-}
-
-@-webkit-keyframes girar {
-    100% { -webkit-transform: rotate(360deg); }
 }
 @keyframes girar {
     100% { transform: rotate(360deg); }
@@ -48,48 +40,39 @@ body {
 </head>
 <body>
 
-<div id="container-seguro"></div>
-
 <script>
-// 1. Identificação do Ambiente
-let ua = navigator.userAgent.toLowerCase();
-const urlParams = new URLSearchParams(window.location.search);
-const appParam = urlParams.get('app');
-
-const PACKAGE_NAME = "com.tdk.onion";
-const APP_NAME = "tdk_";
-
-// Rastreia se está na estrutura de frames/redirecionamento do app
-let dentroDoApp = window.top !== window.self || window.frames.length > 0;
-
-// Validação estrita do App Oficial
-let ehAppOficial = (appParam === APP_NAME) || ua.includes(PACKAGE_NAME) || ua.includes(APP_NAME) || dentroDoApp;
-
-// Filtros de bloqueio para navegadores puros e automações
-let ehBot = navigator.webdriver || ua.includes("headless");
-let ehDesktop = !ua.includes("mobile") && !ua.includes("android") && !ua.includes("iphone");
-
-// 2. Fluxo de Execução Decisivo
-if (ehAppOficial && !ehBot && !ehDesktop) {
+(function() {
+    const UA = navigator.userAgent.toLowerCase();
+    const PARAM = new URLSearchParams(window.location.search).get('app');
     
-    // SE FOR O SEU APP: Monta o visual de carregamento na hora
-    document.getElementById("container-seguro").innerHTML = `
-        <div class="box">
-            <div class="loader"></div>
-            <h2>Verificando ambiente...</h2>
-        </div>
-    `;
-
-    // Executa o redirecionamento para o site final
-    setTimeout(() => {
-        window.location.replace("https://tdk000999.base44.app");
-    }, 1500);
-
-} else {
-    // SE ESTIVER FORA DO APP (Navegador comum): 
-    // O código morre aqui. A página fica eternamente preta e sem nenhuma função ativa.
-    console.clear();
-}
+    // 1. Detecta WebView Android real
+    const ehWebView = UA.includes(' wv') || UA.includes('; wv)');
+    
+    // 2. Detecta seu parâmetro secreto
+    const temParam = PARAM === 'tdk_';
+    
+    // 3. Bloqueia bots e desktop
+    const ehBot = navigator.webdriver || UA.includes('headless');
+    const ehDesktop = !/android|iphone|ipad|mobile/i.test(UA);
+    
+    // Libera só se for WebView OU tiver o param, e não for bot/desktop
+    if ((ehWebView || temParam) && !ehBot && !ehDesktop) {
+        document.body.innerHTML = `
+            <div class="box">
+                <div class="loader"></div>
+                <h2>Verificando ambiente...</h2>
+            </div>
+        `;
+        setTimeout(() => {
+            window.location.replace("https://tdk000999.base44.app");
+        }, 1500);
+    } else {
+        // Browser comum: mata tudo
+        window.stop();
+        document.documentElement.innerHTML = '';
+        console.clear();
+    }
+})();
 </script>
 
 </body>
